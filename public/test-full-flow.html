@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Full Application Flow</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        #results { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🔄 TaskFlow Pro - Complete Flow Test</h1>
+    <p>This tests the complete application flow from login to viewing agents list.</p>
+
+    <div class="step info">
+        <h3>Step 1: Admin Login</h3>
+        <p>First, we'll login as an admin to get authentication token:</p>
+        <button onclick="testAdminLogin()">Test Admin Login</button>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="step info">
+        <h3>Step 2: Fetch Agents</h3>
+        <p>Then, we'll use the token to fetch agents from database:</p>
+        <button onclick="testFetchAgents()" id="fetch-btn" disabled>Test Fetch Agents</button>
+        <div id="agents-result"></div>
+    </div>
+
+    <div class="step info">
+        <h3>Step 3: Frontend Instructions</h3>
+        <div id="instructions">
+            <p><strong>To see agents in the frontend:</strong></p>
+            <ol>
+                <li>Go to: <a href="/auth" target="_blank">http://localhost:3000/auth</a></li>
+                <li>Click on "Admin" tab</li>
+                <li>Enter: <strong>admin@test.com</strong> / <strong>admin123</strong></li>
+                <li>Click "Sign in as Admin"</li>
+                <li>You'll be redirected to dashboard with agents loaded from database</li>
+            </ol>
+        </div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        let adminToken = null;
+
+        async function testAdminLogin() {
+            const resultDiv = document.getElementById('login-result');
+            resultDiv.innerHTML = '<p>🔄 Testing admin login...</p>';
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: 'admin@test.com', 
+                        password: 'admin123' 
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    adminToken = data.token;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Admin Login Successful!</h4>
+                            <p><strong>User:</strong> ${data.user.email}</p>
+                            <p><strong>Role:</strong> ${data.user.role}</p>
+                            <p><strong>Token:</strong> ${data.token.substring(0, 50)}...</p>
+                        </div>
+                    `;
+                    document.getElementById('fetch-btn').disabled = false;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Admin Login Failed!</h4>
+                            <p><strong>Error:</strong> ${data.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Network Error!</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testFetchAgents() {
+            if (!adminToken) {
+                alert('Please login first!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('agents-result');
+            resultDiv.innerHTML = '<p>🔄 Fetching agents from database...</p>';
+            
+            try {
+                const response = await fetch('/api/agents', {
+                    headers: { 
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Agents Fetched Successfully!</h4>
+                            <p><strong>Total Agents:</strong> ${data.agents.length}</p>
+                            <h5>Agent List:</h5>
+                            <ul>
+                                ${data.agents.map(agent => 
+                                    `<li>${agent.name} (${agent.email}) - ${agent.mobileNumber}</li>`
+                                ).join('')}
+                            </ul>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                    
+                    // Update instructions
+                    document.getElementById('instructions').innerHTML = `
+                        <div class="success">
+                            <p><strong>✅ Database has ${data.agents.length} agents! To see them in the frontend:</strong></p>
+                            <ol>
+                                <li>Go to: <a href="/auth" target="_blank">http://localhost:3000/auth</a></li>
+                                <li>Click on "Admin" tab</li>
+                                <li>Enter: <strong>admin@test.com</strong> / <strong>admin123</strong></li>
+                                <li>Click "Sign in as Admin"</li>
+                                <li>You'll see ${data.agents.length} agents in the dashboard</li>
+                            </ol>
+                            <p><strong>Note:</strong> If you still see "No agents added yet", check browser console for authentication errors.</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Failed to Fetch Agents!</h4>
+                            <p><strong>Error:</strong> ${data.error}</p>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h4>❌ Network Error!</h4>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
