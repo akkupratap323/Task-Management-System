@@ -29,6 +29,8 @@ export default function AgentLoginPage() {
     setError('');
     setLoading(true);
 
+    console.log('🔍 Frontend: Agent login attempt:', { email: formData.email, passwordLength: formData.password?.length });
+
     try {
       const response = await fetch('/api/auth/agent-login', {
         method: 'POST',
@@ -39,16 +41,19 @@ export default function AgentLoginPage() {
       });
 
       const data = await response.json();
+      console.log('🔍 Frontend: API response:', { status: response.status, success: data.success, error: data.error });
 
       if (data.success) {
+        console.log('✅ Frontend: Login successful, redirecting to agent dashboard');
         login(data.token, data.agent);
         router.push('/agent-dashboard');
       } else {
+        console.log('❌ Frontend: Login failed:', data.error);
         setError(data.error || 'Login failed');
       }
     } catch (error) {
+      console.error('❌ Frontend: Exception during login:', error);
       setError('An error occurred during login');
-      console.error('Agent login error:', error);
     } finally {
       setLoading(false);
     }
