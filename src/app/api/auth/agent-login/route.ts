@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import Agent from '@/models/Agent';
+import User from '@/models/User'; // Import User model to ensure it's registered
 import { signToken } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
     await dbConnect();
+    
+    // Ensure User model is registered (force instantiation)
+    User;
     
     const { email, password } = await request.json();
     console.log('🔍 Agent login attempt:', { email, passwordLength: password?.length });
