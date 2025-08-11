@@ -60,22 +60,41 @@ export default function Dashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
-    fetchAgents();
-  }, []);
+    if (token) {
+      fetchAgents();
+    }
+  }, [token]);
 
   const fetchAgents = async () => {
     try {
+      console.log('🔍 Frontend: Fetching agents...');
+      console.log('🔍 Frontend: Token available:', !!token);
+      console.log('🔍 Frontend: User:', user);
+      
+      if (!token) {
+        console.log('❌ Frontend: No token available');
+        setLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/agents', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      
+      console.log('🔍 Frontend: Response status:', response.status);
       const data = await response.json();
+      console.log('🔍 Frontend: Response data:', data);
+      
       if (data.success) {
+        console.log('✅ Frontend: Setting agents:', data.agents.length, 'agents');
         setAgents(data.agents);
+      } else {
+        console.log('❌ Frontend: API returned error:', data.error);
       }
     } catch (error) {
-      console.error('Error fetching agents:', error);
+      console.error('❌ Frontend: Error fetching agents:', error);
     } finally {
       setLoading(false);
     }

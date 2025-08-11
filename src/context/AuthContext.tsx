@@ -25,20 +25,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('🔍 AuthContext: Loading from localStorage...');
     const savedToken = localStorage.getItem('token');
     const savedUser = localStorage.getItem('user');
     
+    console.log('🔍 AuthContext: Saved token exists:', !!savedToken);
+    console.log('🔍 AuthContext: Saved user exists:', !!savedUser);
+    
     if (savedToken && savedUser) {
+      console.log('✅ AuthContext: Restoring authentication');
       setToken(savedToken);
       setUser(JSON.parse(savedUser));
+    } else {
+      console.log('❌ AuthContext: No saved authentication found');
     }
   }, []);
 
   const login = (token: string, user: User) => {
+    console.log('✅ AuthContext: Login called with user:', user.email);
     localStorage.setItem('token', token);
     localStorage.setItem('user', JSON.stringify(user));
     setToken(token);
     setUser(user);
+    console.log('✅ AuthContext: Authentication saved to localStorage');
   };
 
   const logout = () => {
