@@ -7,6 +7,9 @@ export interface ITask extends mongoose.Document {
   agentId: mongoose.Types.ObjectId;
   uploadId: string;
   userId: mongoose.Types.ObjectId;
+  status: 'pending' | 'completed';
+  completedAt?: Date;
+  completedBy?: mongoose.Types.ObjectId;
 }
 
 const taskSchema = new mongoose.Schema({
@@ -38,6 +41,18 @@ const taskSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  status: {
+    type: String,
+    enum: ['pending', 'completed'],
+    default: 'pending'
+  },
+  completedAt: {
+    type: Date
+  },
+  completedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Agent'
   }
 }, {
   timestamps: true

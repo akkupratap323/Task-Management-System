@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Tasks Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+        .task-card { border: 1px solid #ddd; margin: 10px 0; padding: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>📋 TaskFlow Pro - Tasks Dashboard Test</h1>
+    <p>This tests the new historical tasks feature for admins.</p>
+
+    <div class="step info">
+        <h3>Step 1: Login as Admin</h3>
+        <p>Login as admin@test.com who has existing tasks in database:</p>
+        <button onclick="testAdminLogin()">Login as admin@test.com</button>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="step info">
+        <h3>Step 2: Fetch All Historical Tasks</h3>
+        <p>Get all tasks created by this admin:</p>
+        <button onclick="testFetchAllTasks()" id="tasks-btn" disabled>Fetch All Tasks</button>
+        <div id="tasks-result"></div>
+    </div>
+
+    <div class="step info">
+        <h3>Step 3: Frontend Instructions</h3>
+        <div id="instructions">
+            <p><strong>To see all your tasks in the dashboard:</strong></p>
+            <ol>
+                <li>Go to: <a href="/auth" target="_blank">http://localhost:3000/auth</a></li>
+                <li>Login as: <strong>admin@test.com</strong> / <strong>admin123</strong></li>
+                <li>Click on the <strong>"Task Distribution"</strong> tab</li>
+                <li>You'll see ALL your historical tasks organized by agent</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let adminToken = null;
+
+        async function testAdminLogin() {
+            const resultDiv = document.getElementById('login-result');
+            resultDiv.innerHTML = '<p>🔄 Logging in as admin@test.com...</p>';
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: 'admin@test.com', 
+                        password: 'admin123' 
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    adminToken = data.token;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Admin Login Successful!</h4>
+                            <p><strong>User:</strong> ${data.user.email}</p>
+                            <p><strong>User ID:</strong> ${data.user.id}</p>
+                        </div>
+                    `;
+                    document.getElementById('tasks-btn').disabled = false;
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><h4>❌ Login Failed!</h4><p>${data.error}</p></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h4>❌ Error!</h4><p>${error.message}</p></div>`;
+            }
+        }
+
+        async function testFetchAllTasks() {
+            if (!adminToken) {
+                alert('Please login first!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('tasks-result');
+            resultDiv.innerHTML = '<p>🔄 Fetching all historical tasks...</p>';
+            
+            try {
+                const response = await fetch('/api/tasks', {
+                    headers: { 
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success && data.tasks) {
+                    // Group tasks by agent
+                    const tasksByAgent = {};
+                    const tasksByUpload = {};
+                    
+                    data.tasks.forEach(task => {
+                        const agentName = task.agentId.name || 'Unknown Agent';
+                        const agentId = task.agentId._id;
+                        
+                        if (!tasksByAgent[agentId]) {
+                            tasksByAgent[agentId] = {
+                                agent: agentName,
+                                email: task.agentId.email,
+                                tasks: []
+                            };
+                        }
+                        tasksByAgent[agentId].tasks.push(task);
+                        
+                        if (!tasksByUpload[task.uploadId]) {
+                            tasksByUpload[task.uploadId] = [];
+                        }
+                        tasksByUpload[task.uploadId].push(task);
+                    });
+
+                    let html = `
+                        <div class="success">
+                            <h4>✅ Found ${data.tasks.length} Historical Tasks!</h4>
+                            <p><strong>Upload Sessions:</strong> ${Object.keys(tasksByUpload).length}</p>
+                            <p><strong>Agents with Tasks:</strong> ${Object.keys(tasksByAgent).length}</p>
+                            
+                            <h5>Tasks by Upload Session:</h5>
+                    `;
+
+                    Object.keys(tasksByUpload).forEach(uploadId => {
+                        const tasks = tasksByUpload[uploadId];
+                        html += `
+                            <div class="task-card">
+                                <h6>📁 Upload ID: ${uploadId} (${tasks.length} tasks)</h6>
+                                <p><small>Created: ${new Date(tasks[0].createdAt).toLocaleString()}</small></p>
+                                <ul>
+                        `;
+                        tasks.slice(0, 3).forEach(task => {
+                            html += `<li>${task.firstName} (${task.phone}) → ${task.agentId.name}</li>`;
+                        });
+                        if (tasks.length > 3) {
+                            html += `<li><em>... and ${tasks.length - 3} more tasks</em></li>`;
+                        }
+                        html += `</ul></div>`;
+                    });
+
+                    html += `
+                            <h5>Tasks by Agent:</h5>
+                    `;
+
+                    Object.values(tasksByAgent).forEach(agentData => {
+                        html += `
+                            <div class="task-card">
+                                <h6>👤 ${agentData.agent} (${agentData.email})</h6>
+                                <p><strong>${agentData.tasks.length} tasks assigned</strong></p>
+                            </div>
+                        `;
+                    });
+
+                    html += `</div>`;
+                    
+                    resultDiv.innerHTML = html;
+                    
+                    // Update instructions
+                    document.getElementById('instructions').innerHTML = `
+                        <div class="success">
+                            <p><strong>✅ Database has ${data.tasks.length} tasks from ${Object.keys(tasksByUpload).length} uploads!</strong></p>
+                            <p><strong>Now in the frontend dashboard:</strong></p>
+                            <ol>
+                                <li>Go to: <a href="/auth" target="_blank">http://localhost:3000/auth</a></li>
+                                <li>Login as: <strong>admin@test.com</strong> / <strong>admin123</strong></li>
+                                <li>Click on <strong>"Task Distribution"</strong> tab</li>
+                                <li>You'll see all ${data.tasks.length} tasks organized by agent</li>
+                            </ol>
+                            <p><strong>🎯 No more "No tasks uploaded yet" - you'll see your entire task history!</strong></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ No Tasks Found!</h4>
+                            <p>Error: ${data.error || 'Unknown error'}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h4>❌ Network Error!</h4><p>${error.message}</p></div>`;
+            }
+        }
+    </script>
+</body>
+</html>

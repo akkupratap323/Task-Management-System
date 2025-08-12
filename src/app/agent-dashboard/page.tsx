@@ -12,6 +12,8 @@ interface Task {
   notes: string;
   createdAt: string;
   updatedAt: string;
+  status: 'pending' | 'completed';
+  completedAt?: string;
 }
 
 interface TaskGroup {
@@ -82,6 +84,52 @@ export default function AgentDashboard() {
     return taskGroups.reduce((total, group) => total + group.tasks.length, 0);
   };
 
+  const getCompletedTasksCount = () => {
+    return taskGroups.reduce((total, group) => 
+      total + group.tasks.filter(task => task.status === 'completed').length, 0
+    );
+  };
+
+  const handleTaskCompletion = async (taskId: string, currentStatus: string) => {
+    try {
+      const isCompleting = currentStatus === 'pending';
+      const method = isCompleting ? 'POST' : 'DELETE';
+      
+      const response = await fetch(`/api/tasks/${taskId}/complete`, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Update the task in the local state
+        setTaskGroups(prevGroups => 
+          prevGroups.map(group => ({
+            ...group,
+            tasks: group.tasks.map(task => 
+              task.id === taskId 
+                ? { 
+                    ...task, 
+                    status: isCompleting ? 'completed' : 'pending',
+                    completedAt: isCompleting ? new Date().toISOString() : undefined
+                  }
+                : task
+            )
+          }))
+        );
+      } else {
+        alert(`Failed to ${isCompleting ? 'complete' : 'uncomplete'} task: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      alert('An error occurred while updating the task');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -150,14 +198,18 @@ export default function AgentDashboard() {
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                 Task Summary
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <dt className="text-sm font-medium text-blue-600">Total Tasks</dt>
                   <dd className="mt-1 text-2xl font-semibold text-blue-900">{pagination.totalTasks}</dd>
                 </div>
                 <div className="bg-green-50 p-4 rounded-lg">
-                  <dt className="text-sm font-medium text-green-600">Current Page Tasks</dt>
-                  <dd className="mt-1 text-2xl font-semibold text-green-900">{getTotalTasksCount()}</dd>
+                  <dt className="text-sm font-medium text-green-600">Completed</dt>
+                  <dd className="mt-1 text-2xl font-semibold text-green-900">{getCompletedTasksCount()}</dd>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <dt className="text-sm font-medium text-orange-600">Pending</dt>
+                  <dd className="mt-1 text-2xl font-semibold text-orange-900">{getTotalTasksCount() - getCompletedTasksCount()}</dd>
                 </div>
                 <div className="bg-purple-50 p-4 rounded-lg">
                   <dt className="text-sm font-medium text-purple-600">Task Groups</dt>
@@ -199,11 +251,20 @@ export default function AgentDashboard() {
                     <div className="max-h-96 overflow-y-auto">
                       <div className="grid grid-cols-1 gap-3">
                         {group.tasks.map((task, taskIndex) => (
-                          <div key={task.id} className="bg-gray-50 rounded p-4 border-l-4 border-green-400">
+                          <div key={task.id} className={`bg-gray-50 rounded p-4 border-l-4 ${task.status === 'completed' ? 'border-green-500 bg-green-50' : 'border-blue-400'}`}>
                             <div className="flex justify-between items-start">
                               <div className="flex-1">
-                                <div className="flex justify-between mb-2">
-                                  <span className="font-medium text-gray-900">{task.firstName}</span>
+                                <div className="flex justify-between items-center mb-2">
+                                  <div className="flex items-center space-x-2">
+                                    <span className="font-medium text-gray-900">{task.firstName}</span>
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                      task.status === 'completed' 
+                                        ? 'bg-green-100 text-green-800' 
+                                        : 'bg-yellow-100 text-yellow-800'
+                                    }`}>
+                                      {task.status === 'completed' ? '✓ Completed' : '⏳ Pending'}
+                                    </span>
+                                  </div>
                                   <span className="text-gray-600">{task.phone}</span>
                                 </div>
                                 {task.notes && (
@@ -214,7 +275,22 @@ export default function AgentDashboard() {
                                   {task.updatedAt !== task.createdAt && (
                                     <p>Updated: {formatDate(task.updatedAt)}</p>
                                   )}
+                                  {task.status === 'completed' && task.completedAt && (
+                                    <p className="text-green-600 font-medium">Completed: {formatDate(task.completedAt)}</p>
+                                  )}
                                 </div>
+                              </div>
+                              <div className="ml-4">
+                                <button
+                                  onClick={() => handleTaskCompletion(task.id, task.status)}
+                                  className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
+                                    task.status === 'completed'
+                                      ? 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                      : 'bg-green-600 text-white hover:bg-green-700'
+                                  }`}
+                                >
+                                  {task.status === 'completed' ? 'Mark Pending' : 'Mark Complete'}
+                                </button>
                               </div>
                             </div>
                           </div>
