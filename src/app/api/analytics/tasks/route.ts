@@ -8,7 +8,27 @@ import { authenticateRequest } from '@/lib/auth';
 export async function GET(request: NextRequest) {
   try {
     const user = authenticateRequest(request);
-    if (!user || (user as any).role === 'agent') {
+    console.log('🔍 Analytics API - User from token:', user);
+    
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Authentication required - No valid token' },
+        { status: 401 }
+      );
+    }
+    
+    if ((user as any).role === 'agent') {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin access required' },
+        { status: 401 }
+      );
+    }
+    
+    // Default to admin if role is not explicitly set or is 'admin'
+    if (!(user as any).role || (user as any).role === 'admin') {
+      console.log('✅ Analytics API - Admin access granted');
+    } else {
+      console.log('❌ Analytics API - Invalid role:', (user as any).role);
       return NextResponse.json(
         { error: 'Unauthorized - Admin access required' },
         { status: 401 }

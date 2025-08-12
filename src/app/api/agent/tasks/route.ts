@@ -57,7 +57,9 @@ export async function GET(request: NextRequest) {
         phone: task.phone,
         notes: task.notes,
         createdAt: task.createdAt,
-        updatedAt: task.updatedAt
+        updatedAt: task.updatedAt,
+        status: task.status || 'pending',
+        completedAt: task.completedAt
       });
     });
 

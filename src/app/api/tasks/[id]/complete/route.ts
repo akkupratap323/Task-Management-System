@@ -7,7 +7,7 @@ import { authenticateRequest } from '@/lib/auth';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = authenticateRequest(request);
@@ -24,6 +24,7 @@ export async function POST(
     User;
     Agent;
 
+    const params = await context.params;
     const taskId = params.id;
     const agentId = (user as any).agentId;
 
@@ -83,7 +84,7 @@ export async function POST(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = authenticateRequest(request);
@@ -100,6 +101,7 @@ export async function DELETE(
     User;
     Agent;
 
+    const params = await context.params;
     const taskId = params.id;
     const agentId = (user as any).agentId;
 

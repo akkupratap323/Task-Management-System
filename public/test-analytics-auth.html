@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Analytics Authentication</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .step { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Analytics Authentication Test</h1>
+    <p>This helps debug the analytics authentication issue.</p>
+
+    <div class="step info">
+        <h3>Step 1: Admin Login</h3>
+        <button onclick="testAdminLogin()">Login as admin@test.com</button>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="step info">
+        <h3>Step 2: Test Analytics API</h3>
+        <button onclick="testAnalytics()" id="analytics-btn" disabled>Test Analytics API</button>
+        <div id="analytics-result"></div>
+    </div>
+
+    <div class="step info">
+        <h3>Step 3: Check Token Details</h3>
+        <button onclick="decodeToken()" id="token-btn" disabled>Decode JWT Token</button>
+        <div id="token-result"></div>
+    </div>
+
+    <script>
+        let adminToken = null;
+
+        async function testAdminLogin() {
+            const resultDiv = document.getElementById('login-result');
+            resultDiv.innerHTML = '<p>🔄 Logging in...</p>';
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        email: 'admin@test.com', 
+                        password: 'admin123' 
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    adminToken = data.token;
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Login Successful!</h4>
+                            <p><strong>Email:</strong> ${data.user.email}</p>
+                            <p><strong>Role:</strong> ${data.user.role}</p>
+                            <p><strong>User ID:</strong> ${data.user.id}</p>
+                            <details>
+                                <summary>JWT Token (click to expand)</summary>
+                                <pre>${adminToken}</pre>
+                            </details>
+                        </div>
+                    `;
+                    document.getElementById('analytics-btn').disabled = false;
+                    document.getElementById('token-btn').disabled = false;
+                } else {
+                    resultDiv.innerHTML = `<div class="error"><h4>❌ Login Failed!</h4><p>${data.error}</p></div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h4>❌ Error!</h4><p>${error.message}</p></div>`;
+            }
+        }
+
+        async function testAnalytics() {
+            if (!adminToken) {
+                alert('Please login first!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('analytics-result');
+            resultDiv.innerHTML = '<p>🔄 Testing Analytics API...</p>';
+            
+            try {
+                const response = await fetch('/api/analytics/tasks', {
+                    headers: { 
+                        'Authorization': `Bearer ${adminToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h4>✅ Analytics API Success!</h4>
+                            <p><strong>Total Tasks:</strong> ${data.analytics.overview.totalTasks}</p>
+                            <p><strong>Completed:</strong> ${data.analytics.overview.completedTasks}</p>
+                            <p><strong>Completion Rate:</strong> ${data.analytics.overview.completionRate}%</p>
+                            <p><strong>Agents:</strong> ${data.analytics.agentPerformance.length}</p>
+                            <details>
+                                <summary>Full Analytics Data (click to expand)</summary>
+                                <pre>${JSON.stringify(data.analytics, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h4>❌ Analytics API Failed!</h4>
+                            <p><strong>Status:</strong> ${response.status}</p>
+                            <p><strong>Error:</strong> ${data.error}</p>
+                            <details>
+                                <summary>Full Response (click to expand)</summary>
+                                <pre>${JSON.stringify(data, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h4>❌ Network Error!</h4><p>${error.message}</p></div>`;
+            }
+        }
+
+        function decodeToken() {
+            if (!adminToken) {
+                alert('Please login first!');
+                return;
+            }
+
+            const resultDiv = document.getElementById('token-result');
+            
+            try {
+                // Decode JWT (just the payload, not verifying signature)
+                const base64Url = adminToken.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+
+                const payload = JSON.parse(jsonPayload);
+                
+                resultDiv.innerHTML = `
+                    <div class="info">
+                        <h4>🔍 JWT Token Payload</h4>
+                        <p><strong>User ID:</strong> ${payload.userId || 'Not set'}</p>
+                        <p><strong>Email:</strong> ${payload.email || 'Not set'}</p>
+                        <p><strong>Role:</strong> ${payload.role || 'Not set'}</p>
+                        <p><strong>Issued At:</strong> ${payload.iat ? new Date(payload.iat * 1000).toLocaleString() : 'Not set'}</p>
+                        <p><strong>Expires At:</strong> ${payload.exp ? new Date(payload.exp * 1000).toLocaleString() : 'Not set'}</p>
+                        <details>
+                            <summary>Full Payload (click to expand)</summary>
+                            <pre>${JSON.stringify(payload, null, 2)}</pre>
+                        </details>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error"><h4>❌ Token Decode Error!</h4><p>${error.message}</p></div>`;
+            }
+        }
+    </script>
+</body>
+</html>
