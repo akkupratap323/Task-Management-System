@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
     const completionRate = totalTasks > 0 ? ((completedTasks / totalTasks) * 100).toFixed(1) : 0;
 
     // Group by agent
-    const agentStats = {};
+    const agentStats: Record<string, any> = {};
     allTasks.forEach(task => {
       const agentId = task.agentId._id.toString();
       const agentName = task.agentId.name;
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Group by upload session
-    const uploadStats = {};
+    const uploadStats: Record<string, any> = {};
     allTasks.forEach(task => {
       if (!uploadStats[task.uploadId]) {
         uploadStats[task.uploadId] = {
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
     const completionTimeline = [];
-    const timelineMap = {};
+    const timelineMap: Record<string, any> = {};
     
     // Initialize last 7 days
     for (let i = 6; i >= 0; i--) {
@@ -163,7 +163,7 @@ export async function GET(request: NextRequest) {
           totalTasks,
           completedTasks,
           pendingTasks,
-          completionRate: parseFloat(completionRate)
+          completionRate: parseFloat(completionRate.toString())
         },
         agentPerformance: Object.values(agentStats),
         uploadSessions: Object.values(uploadStats).sort((a: any, b: any) => 

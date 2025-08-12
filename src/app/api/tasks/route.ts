@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     if (uploadId && !agentId) {
       const agents = await Agent.find({ userId: (user as any).userId });
-      const tasksByAgent = {};
+      const tasksByAgent: Record<string, any> = {};
 
       for (const agent of agents) {
         tasksByAgent[agent._id.toString()] = {

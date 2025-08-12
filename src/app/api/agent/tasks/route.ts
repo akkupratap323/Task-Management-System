@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     });
 
     // Group tasks by upload ID for better organization
-    const tasksByUpload = {};
+    const tasksByUpload: Record<string, any> = {};
     tasks.forEach(task => {
       if (!tasksByUpload[task.uploadId]) {
         tasksByUpload[task.uploadId] = {

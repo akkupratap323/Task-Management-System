@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     const savedTasks = await Task.insertMany(distributedTasks);
 
-    const tasksByAgent = {};
+    const tasksByAgent: Record<string, any[]> = {};
     for (const task of savedTasks) {
       const agentId = task.agentId.toString();
       if (!tasksByAgent[agentId]) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
@@ -24,7 +24,7 @@ import {
 } from 'lucide-react';
 import { toast } from "sonner";
 
-export default function AuthPage() {
+function AuthPageContent() {
   const [adminForm, setAdminForm] = useState({
     email: '',
     password: ''
@@ -215,7 +215,7 @@ export default function AuthPage() {
 
   const togglePasswordVisibility = (form: string, field: string = 'main') => {
     const key = form === 'register' && field === 'confirm' ? 'confirm' : form;
-    setShowPassword(prev => ({ ...prev, [key]: !prev[key] }));
+    setShowPassword(prev => ({ ...prev, [key as keyof typeof prev]: !prev[key as keyof typeof prev] }));
   };
 
   return (
@@ -486,5 +486,17 @@ export default function AuthPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
+      </div>
+    }>
+      <AuthPageContent />
+    </Suspense>
   );
 }

@@ -5,7 +5,7 @@ import { authenticateRequest } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = authenticateRequest(request);
@@ -17,8 +17,9 @@ export async function GET(
     }
 
     await dbConnect();
+    const { id } = await params;
     
-    const task = await Task.findOne({ _id: params.id, userId: (user as any).userId })
+    const task = await Task.findOne({ _id: id, userId: (user as any).userId })
       .populate('agentId', 'name email mobileNumber');
     
     if (!task) {
@@ -44,7 +45,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = authenticateRequest(request);
@@ -56,6 +57,7 @@ export async function PUT(
     }
 
     await dbConnect();
+    const { id } = await params;
     
     const { firstName, phone, notes } = await request.json();
 
@@ -67,7 +69,7 @@ export async function PUT(
     }
 
     const task = await Task.findOneAndUpdate(
-      { _id: params.id, userId: (user as any).userId },
+      { _id: id, userId: (user as any).userId },
       { firstName, phone, notes: notes || '' },
       { new: true, runValidators: true }
     ).populate('agentId', 'name email mobileNumber');
@@ -95,7 +97,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = authenticateRequest(request);
@@ -107,8 +109,9 @@ export async function DELETE(
     }
 
     await dbConnect();
+    const { id } = await params;
     
-    const task = await Task.findOneAndDelete({ _id: params.id, userId: (user as any).userId });
+    const task = await Task.findOneAndDelete({ _id: id, userId: (user as any).userId });
     
     if (!task) {
       return NextResponse.json(

@@ -124,18 +124,18 @@ export default function Dashboard() {
       
       if (data.success && data.tasks) {
         // Group tasks by upload ID and agent
-        const tasksByUpload = {};
+        const tasksByUpload: Record<string, any> = {};
         const agents = await fetch('/api/agents', {
           headers: { 'Authorization': `Bearer ${token}` }
         }).then(res => res.json()).then(res => res.agents || []);
 
         // Create agent lookup
-        const agentLookup = {};
-        agents.forEach(agent => {
+        const agentLookup: Record<string, any> = {};
+        agents.forEach((agent: any) => {
           agentLookup[agent._id] = agent;
         });
 
-        data.tasks.forEach(task => {
+        data.tasks.forEach((task: any) => {
           if (!tasksByUpload[task.uploadId]) {
             tasksByUpload[task.uploadId] = {
               uploadId: task.uploadId,
@@ -164,9 +164,9 @@ export default function Dashboard() {
         });
 
         // Convert to the format expected by the UI
-        const distribution = [];
-        Object.values(tasksByUpload).forEach(upload => {
-          Object.values(upload.agents).forEach(agentData => {
+        const distribution: TaskDistribution[] = [];
+        Object.values(tasksByUpload).forEach((upload: any) => {
+          Object.values(upload.agents).forEach((agentData: any) => {
             distribution.push(agentData);
           });
         });
@@ -260,7 +260,7 @@ export default function Dashboard() {
         setCurrentUploadId(data.uploadId);
         setActiveTab('tasks');
         setUploadFile(null);
-        const totalTasks = data.distribution.reduce((sum, dist) => sum + dist.taskCount, 0);
+        const totalTasks = data.distribution.reduce((sum: number, dist: any) => sum + dist.taskCount, 0);
         toast.success("🚀 CSV uploaded and tasks distributed!", {
           description: `${totalTasks} tasks assigned to ${data.distribution.length} agents`,
           duration: 5000,
@@ -651,7 +651,7 @@ export default function Dashboard() {
                           </h3>
                           <p className="text-sm text-gray-600">
                             {currentUploadId ? `Latest Upload ID: ${currentUploadId} | ` : ''}
-                            Total Tasks: {taskDistributions.reduce((sum, dist) => sum + dist.taskCount, 0)} | 
+                            Total Tasks: {taskDistributions.reduce((sum: number, dist: any) => sum + dist.taskCount, 0)} | 
                             Agents with Tasks: {taskDistributions.length}
                           </p>
                           <p className="text-xs text-gray-500 mt-1">

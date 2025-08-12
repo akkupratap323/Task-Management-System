@@ -6,7 +6,7 @@ import { authenticateRequest } from '@/lib/auth';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = authenticateRequest(request);
@@ -18,8 +18,9 @@ export async function GET(
     }
 
     await dbConnect();
+    const { id } = await params;
     
-    const agent = await Agent.findOne({ _id: params.id, userId: (user as any).userId }).select('-password');
+    const agent = await Agent.findOne({ _id: id, userId: (user as any).userId }).select('-password');
     if (!agent) {
       return NextResponse.json(
         { error: 'Agent not found' },
@@ -27,7 +28,7 @@ export async function GET(
       );
     }
 
-    const tasks = await Task.find({ agentId: params.id, userId: (user as any).userId });
+    const tasks = await Task.find({ agentId: id, userId: (user as any).userId });
 
     return NextResponse.json({
       success: true,
@@ -46,7 +47,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = authenticateRequest(request);
@@ -58,6 +59,7 @@ export async function PUT(
     }
 
     await dbConnect();
+    const { id } = await params;
     
     const { name, email, mobileNumber } = await request.json();
 
@@ -69,7 +71,7 @@ export async function PUT(
     }
 
     const agent = await Agent.findOneAndUpdate(
-      { _id: params.id, userId: (user as any).userId },
+      { _id: id, userId: (user as any).userId },
       { name, email, mobileNumber },
       { new: true, runValidators: true }
     ).select('-password');
@@ -97,7 +99,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = authenticateRequest(request);
@@ -109,8 +111,9 @@ export async function DELETE(
     }
 
     await dbConnect();
+    const { id } = await params;
     
-    const agent = await Agent.findOneAndDelete({ _id: params.id, userId: (user as any).userId });
+    const agent = await Agent.findOneAndDelete({ _id: id, userId: (user as any).userId });
     if (!agent) {
       return NextResponse.json(
         { error: 'Agent not found' },
@@ -118,7 +121,7 @@ export async function DELETE(
       );
     }
 
-    await Task.deleteMany({ agentId: params.id, userId: (user as any).userId });
+    await Task.deleteMany({ agentId: id, userId: (user as any).userId });
 
     return NextResponse.json({
       success: true,
