@@ -22,6 +22,7 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
+import { toast } from "sonner";
 
 export default function AuthPage() {
   const [adminForm, setAdminForm] = useState({
@@ -92,9 +93,17 @@ export default function AuthPage() {
       if (data.success) {
         console.log('✅ Auth: Admin login successful, redirecting to dashboard');
         login(data.token, data.user);
+        toast.success("🎉 Welcome back, Admin!", {
+          description: "Successfully logged in to your dashboard",
+          duration: 4000,
+        });
         router.push('/dashboard');
       } else {
         setErrors(prev => ({ ...prev, admin: data.error || 'Login failed' }));
+        toast.error("❌ Login failed", {
+          description: data.error || 'Please check your credentials',
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('❌ Auth: Admin login error:', error);
@@ -124,9 +133,17 @@ export default function AuthPage() {
       if (data.success) {
         console.log('✅ Auth: Agent login successful, redirecting to agent dashboard');
         login(data.token, data.agent);
+        toast.success("🎉 Welcome back, Agent!", {
+          description: `Hello ${data.agent.name}, ready to work on your tasks?`,
+          duration: 4000,
+        });
         router.push('/agent-dashboard');
       } else {
         setErrors(prev => ({ ...prev, agent: data.error || 'Login failed' }));
+        toast.error("❌ Agent login failed", {
+          description: data.error || 'Please check your credentials',
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('❌ Auth: Agent login error:', error);
@@ -166,9 +183,17 @@ export default function AuthPage() {
 
       if (data.success) {
         login(data.token, data.user);
+        toast.success("🎉 Account created successfully!", {
+          description: "Welcome to TaskFlow Pro! Your workspace is ready",
+          duration: 4000,
+        });
         router.push('/dashboard');
       } else {
         setErrors(prev => ({ ...prev, register: data.error || 'Registration failed' }));
+        toast.error("❌ Registration failed", {
+          description: data.error || 'Please try again with different details',
+          duration: 4000,
+        });
       }
     } catch (error) {
       setErrors(prev => ({ ...prev, register: 'An error occurred during registration' }));

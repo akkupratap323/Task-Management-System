@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import TaskEditModal from '@/components/TaskEditModal';
 import TaskAnalytics from '@/components/TaskAnalytics';
+import { toast } from "sonner";
 
 interface Agent {
   _id: string;
@@ -212,8 +213,16 @@ export default function Dashboard() {
       if (data.success) {
         setAgents(prev => [...prev, data.agent]);
         setAgentForm({ name: '', email: '', mobileNumber: '', password: '' });
+        toast.success("🎉 Agent created successfully!", {
+          description: `${data.agent.name} has been added to your team`,
+          duration: 4000,
+        });
       } else {
         setAgentFormError(data.error || 'Failed to create agent');
+        toast.error("❌ Failed to create agent", {
+          description: data.error || 'Please try again',
+          duration: 4000,
+        });
       }
     } catch (error) {
       setAgentFormError('An error occurred while creating agent');
@@ -251,8 +260,17 @@ export default function Dashboard() {
         setCurrentUploadId(data.uploadId);
         setActiveTab('tasks');
         setUploadFile(null);
+        const totalTasks = data.distribution.reduce((sum, dist) => sum + dist.taskCount, 0);
+        toast.success("🚀 CSV uploaded and tasks distributed!", {
+          description: `${totalTasks} tasks assigned to ${data.distribution.length} agents`,
+          duration: 5000,
+        });
       } else {
         setUploadError(data.error || 'Failed to upload file');
+        toast.error("❌ Failed to upload CSV", {
+          description: data.error || 'Please check your file format',
+          duration: 4000,
+        });
       }
     } catch (error) {
       setUploadError('An error occurred during file upload');
@@ -277,9 +295,17 @@ export default function Dashboard() {
       const data = await response.json();
 
       if (data.success) {
+        const deletedAgent = agents.find(agent => agent._id === agentId);
         setAgents(prev => prev.filter(agent => agent._id !== agentId));
+        toast.success("🗑️ Agent deleted successfully", {
+          description: `${deletedAgent?.name || 'Agent'} has been removed from your team`,
+          duration: 4000,
+        });
       } else {
-        alert('Failed to delete agent');
+        toast.error("❌ Failed to delete agent", {
+          description: data.error || 'Please try again',
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('Error deleting agent:', error);
@@ -315,6 +341,10 @@ export default function Dashboard() {
             )
           }))
         );
+        toast.success("✏️ Task updated successfully!", {
+          description: `Changes saved for ${updatedTask.firstName}`,
+          duration: 4000,
+        });
       } else {
         throw new Error(data.error || 'Failed to update task');
       }
@@ -339,6 +369,13 @@ export default function Dashboard() {
       const data = await response.json();
 
       if (data.success) {
+        // Get task name before deletion
+        let taskName = '';
+        taskDistributions.forEach(dist => {
+          const task = dist.tasks.find(t => t._id === taskId);
+          if (task) taskName = task.firstName;
+        });
+        
         // Remove the task from the current distribution
         setTaskDistributions(prev => 
           prev.map(distribution => ({
@@ -347,8 +384,15 @@ export default function Dashboard() {
             taskCount: distribution.tasks.filter(task => task._id !== taskId).length
           }))
         );
+        toast.success("🗑️ Task deleted successfully", {
+          description: `Task for ${taskName} has been removed`,
+          duration: 4000,
+        });
       } else {
-        alert('Failed to delete task');
+        toast.error("❌ Failed to delete task", {
+          description: data.error || 'Please try again',
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('Error deleting task:', error);

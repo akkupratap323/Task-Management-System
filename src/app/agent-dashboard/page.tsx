@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import ProtectedAgentRoute from '@/components/ProtectedAgentRoute';
+import { toast } from "sonner";
 
 interface Task {
   id: string;
@@ -106,6 +107,13 @@ export default function AgentDashboard() {
       const data = await response.json();
 
       if (data.success) {
+        // Get task name for toast
+        let taskName = '';
+        taskGroups.forEach(group => {
+          const task = group.tasks.find(t => t.id === taskId);
+          if (task) taskName = task.firstName;
+        });
+
         // Update the task in the local state
         setTaskGroups(prevGroups => 
           prevGroups.map(group => ({
@@ -121,8 +129,23 @@ export default function AgentDashboard() {
             )
           }))
         );
+
+        if (isCompleting) {
+          toast.success("✅ Task completed!", {
+            description: `Great job! Task for ${taskName} is now complete`,
+            duration: 4000,
+          });
+        } else {
+          toast.success("🔄 Task marked as pending", {
+            description: `Task for ${taskName} is back to pending status`,
+            duration: 4000,
+          });
+        }
       } else {
-        alert(`Failed to ${isCompleting ? 'complete' : 'uncomplete'} task: ${data.error}`);
+        toast.error(`❌ Failed to ${isCompleting ? 'complete' : 'uncomplete'} task`, {
+          description: data.error || 'Please try again',
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('Error updating task status:', error);
