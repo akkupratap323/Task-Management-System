@@ -62,6 +62,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (token) {
       fetchAgents();
+      fetchAllTasks(); // Fetch all historical tasks on load
     }
   }, [token]);
 
@@ -97,6 +98,88 @@ export default function Dashboard() {
       console.error('❌ Frontend: Error fetching agents:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAllTasks = async () => {
+    try {
+      console.log('🔍 Frontend: Fetching all tasks for current admin...');
+      
+      if (!token) {
+        console.log('❌ Frontend: No token available for tasks');
+        return;
+      }
+
+      const response = await fetch('/api/tasks', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      console.log('🔍 Frontend: Tasks response status:', response.status);
+      const data = await response.json();
+      console.log('🔍 Frontend: Tasks data:', data);
+      
+      if (data.success && data.tasks) {
+        // Group tasks by upload ID and agent
+        const tasksByUpload = {};
+        const agents = await fetch('/api/agents', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }).then(res => res.json()).then(res => res.agents || []);
+
+        // Create agent lookup
+        const agentLookup = {};
+        agents.forEach(agent => {
+          agentLookup[agent._id] = agent;
+        });
+
+        data.tasks.forEach(task => {
+          if (!tasksByUpload[task.uploadId]) {
+            tasksByUpload[task.uploadId] = {
+              uploadId: task.uploadId,
+              createdAt: task.createdAt,
+              agents: {}
+            };
+          }
+          
+          const agentId = task.agentId._id || task.agentId;
+          if (!tasksByUpload[task.uploadId].agents[agentId]) {
+            const agent = task.agentId.name ? task.agentId : agentLookup[agentId];
+            tasksByUpload[task.uploadId].agents[agentId] = {
+              agent: {
+                id: agentId,
+                name: agent?.name || 'Unknown Agent',
+                email: agent?.email || '',
+                mobileNumber: agent?.mobileNumber || ''
+              },
+              tasks: [],
+              taskCount: 0
+            };
+          }
+          
+          tasksByUpload[task.uploadId].agents[agentId].tasks.push(task);
+          tasksByUpload[task.uploadId].agents[agentId].taskCount++;
+        });
+
+        // Convert to the format expected by the UI
+        const distribution = [];
+        Object.values(tasksByUpload).forEach(upload => {
+          Object.values(upload.agents).forEach(agentData => {
+            distribution.push(agentData);
+          });
+        });
+
+        console.log('✅ Frontend: Setting task distributions:', distribution.length, 'agent-task groups');
+        setTaskDistributions(distribution);
+        
+        if (distribution.length > 0) {
+          setActiveTab('tasks'); // Switch to tasks tab if there are tasks
+        }
+      } else {
+        console.log('❌ Frontend: No tasks found or API error:', data.error);
+      }
+    } catch (error) {
+      console.error('❌ Frontend: Error fetching all tasks:', error);
     }
   };
 
@@ -487,7 +570,12 @@ export default function Dashboard() {
                   {taskDistributions.length === 0 ? (
                     <div className="bg-white overflow-hidden shadow rounded-lg">
                       <div className="px-4 py-5 sm:p-6 text-center">
-                        <p className="text-gray-500">No tasks uploaded yet. Upload a CSV file to see task distribution.</p>
+                        <p className="text-gray-500">
+                          No tasks found for your workspace. Upload a CSV file to create and distribute tasks to your agents.
+                        </p>
+                        <div className="mt-4 text-sm text-gray-400">
+                          <p>💡 Tasks from your previous uploads will automatically appear here.</p>
+                        </div>
                       </div>
                     </div>
                   ) : (
@@ -495,11 +583,15 @@ export default function Dashboard() {
                       <div className="bg-white overflow-hidden shadow rounded-lg">
                         <div className="px-4 py-5 sm:p-6">
                           <h3 className="text-lg leading-6 font-medium text-gray-900 mb-2">
-                            Task Distribution Summary
+                            Your Task Distribution History
                           </h3>
                           <p className="text-sm text-gray-600">
-                            Upload ID: {currentUploadId} | 
-                            Total Tasks: {taskDistributions.reduce((sum, dist) => sum + dist.taskCount, 0)}
+                            {currentUploadId ? `Latest Upload ID: ${currentUploadId} | ` : ''}
+                            Total Tasks: {taskDistributions.reduce((sum, dist) => sum + dist.taskCount, 0)} | 
+                            Agents with Tasks: {taskDistributions.length}
+                          </p>
+                          <p className="text-xs text-gray-500 mt-1">
+                            📊 Showing all tasks you've created and distributed across your agents
                           </p>
                         </div>
                       </div>
