@@ -22,20 +22,24 @@ export default function LandingPage() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
-              <Building2 className="h-8 w-8 text-indigo-600" />
-              <h1 className="text-2xl font-bold text-gray-900">TaskFlow Pro</h1>
+              <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-600" />
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">TaskFlow Pro</h1>
               <Badge variant="secondary" className="hidden sm:inline-flex">v2.0</Badge>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Link href="/auth">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="hidden sm:inline-flex">
                   <Lock className="h-4 w-4 mr-2" />
                   Sign In
+                </Button>
+                <Button variant="outline" size="sm" className="sm:hidden">
+                  <Lock className="h-4 w-4" />
                 </Button>
               </Link>
               <Link href="/auth?tab=register">
                 <Button size="sm">
-                  Get Started
+                  <span className="hidden sm:inline">Get Started</span>
+                  <span className="sm:hidden">Start</span>
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
               </Link>
@@ -45,30 +49,31 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20">
+      <section className="py-12 sm:py-20">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-4xl mx-auto">
             <Badge className="mb-4" variant="secondary">
-              Enterprise Task Management Solution
+              <span className="hidden sm:inline">Enterprise Task Management Solution</span>
+              <span className="sm:hidden">Task Management</span>
             </Badge>
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
               Streamline Your 
               <span className="text-indigo-600"> Task Distribution</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed px-4 sm:px-0">
               Efficiently manage agents, distribute tasks from CSV uploads, and track progress 
               with our powerful workspace management system.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/auth?tab=register">
-                <Button size="lg" className="text-lg px-8 py-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
+              <Link href="/auth?tab=register" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4">
                   Start Free Trial
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
                 </Button>
               </Link>
-              <Link href="/auth">
-                <Button variant="outline" size="lg" className="text-lg px-8 py-4">
-                  <Lock className="h-5 w-5 mr-2" />
+              <Link href="/auth" className="w-full sm:w-auto">
+                <Button variant="outline" size="lg" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4">
+                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
                   Sign In
                 </Button>
               </Link>
@@ -78,18 +83,18 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-white">
+      <section className="py-12 sm:py-20 bg-white">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
               Everything You Need to Manage Tasks
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-4 sm:px-0">
               From agent management to task distribution, we've got you covered with enterprise-grade features.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
               <CardHeader className="text-center pb-4">
                 <div className="mx-auto w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mb-4">
@@ -224,26 +229,26 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-indigo-600">
+      <section className="py-12 sm:py-20 bg-indigo-600">
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-4xl font-bold text-white mb-6">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4 sm:mb-6">
               Ready to Transform Your Workflow?
             </h2>
-            <p className="text-xl text-indigo-100 mb-8">
+            <p className="text-lg sm:text-xl text-indigo-100 mb-6 sm:mb-8 px-4 sm:px-0">
               Join thousands of organizations already using TaskFlow Pro to streamline their operations.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/auth?tab=register">
-                <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
+              <Link href="/auth?tab=register" className="w-full sm:w-auto">
+                <Button size="lg" variant="secondary" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4">
                   Start Your Free Trial
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
                 </Button>
               </Link>
-              <Link href="/auth">
-                <Button size="lg" variant="outline" className="text-lg px-8 py-4 bg-transparent border-white text-white hover:bg-white hover:text-indigo-600">
+              <Link href="/auth" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 bg-transparent border-white text-white hover:bg-white hover:text-indigo-600">
                   Sign In
-                  <Lock className="h-5 w-5 ml-2" />
+                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 ml-2" />
                 </Button>
               </Link>
             </div>

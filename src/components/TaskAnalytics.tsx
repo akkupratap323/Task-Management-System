@@ -154,7 +154,7 @@ export default function TaskAnalytics() {
   return (
     <div className="space-y-6">
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
@@ -214,11 +214,11 @@ export default function TaskAnalytics() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Task Status Overview Pie Chart */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Task Status Overview</h3>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Task Status Overview</h3>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={overviewData}
@@ -240,9 +240,9 @@ export default function TaskAnalytics() {
         </div>
 
         {/* Completion Timeline */}
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Completion Timeline (Last 7 Days)</h3>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="bg-white p-4 sm:p-6 rounded-lg shadow">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-4">Completion Timeline (Last 7 Days)</h3>
+          <ResponsiveContainer width="100%" height={250}>
             <LineChart data={timelineData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />

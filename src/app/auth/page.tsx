@@ -220,9 +220,9 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm sm:max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <Link href="/" className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-4">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
@@ -244,17 +244,17 @@ export default function AuthPage() {
           <CardContent className="p-6">
             <Tabs defaultValue={defaultTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="admin" className="flex items-center space-x-2">
-                  <Shield className="h-4 w-4" />
-                  <span className="hidden sm:inline">Admin</span>
+                <TabsTrigger value="admin" className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+                  <Shield className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="sm:inline">Admin</span>
                 </TabsTrigger>
-                <TabsTrigger value="agent" className="flex items-center space-x-2">
-                  <UserCheck className="h-4 w-4" />
-                  <span className="hidden sm:inline">Agent</span>
+                <TabsTrigger value="agent" className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+                  <UserCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="sm:inline">Agent</span>
                 </TabsTrigger>
-                <TabsTrigger value="register" className="flex items-center space-x-2">
-                  <User className="h-4 w-4" />
-                  <span className="hidden sm:inline">Register</span>
+                <TabsTrigger value="register" className="flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm">
+                  <User className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="sm:inline">Register</span>
                 </TabsTrigger>
               </TabsList>
 

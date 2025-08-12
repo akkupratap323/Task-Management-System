@@ -172,16 +172,21 @@ export default function AgentDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <h1 className="text-xl font-semibold">Agent Dashboard</h1>
-              <div className="ml-4 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">
-                Agent Portal
+              <h1 className="text-lg sm:text-xl font-semibold truncate">
+                <span className="hidden sm:inline">Agent Dashboard</span>
+                <span className="sm:hidden">Dashboard</span>
+              </h1>
+              <div className="ml-2 sm:ml-4 px-2 sm:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs">
+                <span className="hidden sm:inline">Agent Portal</span>
+                <span className="sm:hidden">Agent</span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-gray-700">Welcome, {agentData?.name || user.name}</span>
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <span className="hidden sm:block text-gray-700">Welcome, {agentData?.name || user.name}</span>
+              <span className="sm:hidden text-gray-700 truncate max-w-20">{(agentData?.name || user.name)?.split(' ')[0]}</span>
               <button
                 onClick={logout}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-gray-500 hover:text-gray-700 text-sm"
               >
                 Logout
               </button>
@@ -198,7 +203,7 @@ export default function AgentDashboard() {
               <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
                 Agent Information
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Name</dt>
                   <dd className="mt-1 text-sm text-gray-900">{agentData?.name || user.name}</dd>

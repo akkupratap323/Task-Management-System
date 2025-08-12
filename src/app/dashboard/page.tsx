@@ -415,16 +415,21 @@ export default function Dashboard() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
               <div className="flex items-center">
-                <h1 className="text-xl font-semibold">Task Management Dashboard</h1>
-                <div className="ml-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                  Your Workspace
+                <h1 className="text-lg sm:text-xl font-semibold truncate">
+                  <span className="hidden sm:inline">Task Management Dashboard</span>
+                  <span className="sm:hidden">Dashboard</span>
+                </h1>
+                <div className="ml-2 sm:ml-4 px-2 sm:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                  <span className="hidden sm:inline">Your Workspace</span>
+                  <span className="sm:hidden">Admin</span>
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
-                <span className="text-gray-700">Welcome, {user?.email}</span>
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <span className="hidden sm:block text-gray-700">Welcome, {user?.email}</span>
+                <span className="sm:hidden text-gray-700 truncate max-w-20">{user?.email?.split('@')[0]}</span>
                 <button
                   onClick={logout}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-gray-500 hover:text-gray-700 text-sm"
                 >
                   Logout
                 </button>
@@ -436,53 +441,57 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
           <div className="px-4 py-6 sm:px-0">
             <div className="border-b border-gray-200">
-              <nav className="-mb-px flex space-x-8">
+              <nav className="-mb-px flex space-x-2 sm:space-x-8 overflow-x-auto">
                 <button
                   onClick={() => setActiveTab('agents')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === 'agents'
                       ? 'border-indigo-500 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  Agents ({agents.length})
+                  <span className="hidden sm:inline">Agents ({agents.length})</span>
+                  <span className="sm:hidden">Agents</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('upload')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === 'upload'
                       ? 'border-indigo-500 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  Upload CSV
+                  <span className="hidden sm:inline">Upload CSV</span>
+                  <span className="sm:hidden">Upload</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('tasks')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === 'tasks'
                       ? 'border-indigo-500 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  Task Distribution
+                  <span className="hidden sm:inline">Task Distribution</span>
+                  <span className="sm:hidden">Tasks</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('analytics')}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`py-2 px-1 border-b-2 font-medium text-xs sm:text-sm whitespace-nowrap ${
                     activeTab === 'analytics'
                       ? 'border-indigo-500 text-indigo-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
-                  Analytics & Charts
+                  <span className="hidden sm:inline">Analytics & Charts</span>
+                  <span className="sm:hidden">Analytics</span>
                 </button>
               </nav>
             </div>
 
             <div className="mt-6">
               {activeTab === 'agents' && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div className="bg-white overflow-hidden shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
                       <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">
